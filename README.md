@@ -4,6 +4,7 @@ SKYWARD Simulink Blockset
 * Contributor : Atef Bouchrit <atef.bouchrit@skywarder.eu>
 
 Copyright (c) 2014 Skyward Experimental Rocketry <www.skywarder.eu>
+
 All rights reserved.
 
 This program is free software; you can redistribute it and/or
