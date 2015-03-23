@@ -2,6 +2,7 @@ SKYWARD Simulink Blockset
 
 * Author : Francescodario Cuzzocrea <francescodario.cuzzocrea@skywarder.eu>
 * Contributor : Atef Bouchrit <atef.bouchrit@skywarder.eu>
+
 Copyright (c) 2014 Skyward Experimental Rocketry <www.skywarder.eu>
 All rights reserved.
 
