@@ -1,5 +1,5 @@
 %% File : GY_88.tlc
-%% Created: Fri Mar 20 16:38:43 2015
+%% Created: Mon Mar 23 07:45:44 2015
 %%
 %% Description: 
 %%   Simulink Coder wrapper functions interface generated for 
@@ -30,14 +30,16 @@
 			real_T *magnitude,
 			real_T *acceleration,
 			real_T *angular_velocity,
-			const real_T *xD);
+			const real_T *xD,
+			const real_T  *S_T, const int_T  p_width0);
   extern void GY_88_Update_wrapper(const real_T *temperature,
 			const real_T *pressure,
 			const real_T *altitude,
 			const real_T *magnitude,
 			const real_T *acceleration,
 			const real_T *angular_velocity,
-			real_T *xD);
+			real_T *xD,
+			const real_T  *S_T,  const int_T  p_width0);
   %closefile externs
   %<LibCacheExtern(externs)>
   %%
@@ -76,8 +78,15 @@
   %assign py4 = LibBlockOutputSignalAddr(4, "", "", 0)
   %assign py5 = LibBlockOutputSignalAddr(5, "", "", 0)
   %assign pxd = LibBlockDWorkAddr(DSTATE, "", "", 0)
+  %assign nelements1 = LibBlockParameterSize(P1)
+  %assign param_width1 = nelements1[0] * nelements1[1]
+  %if (param_width1) > 1
+     %assign pp1 = LibBlockMatrixParameterBaseAddr(P1)
+   %else
+     %assign pp1 = LibBlockParameterAddr(P1, "", "", 0)
+   %endif
   %assign py_width = LibBlockOutputSignalWidth(0)
-  GY_88_Outputs_wrapper( %<py0>, %<py1>, %<py2>, %<py3>, %<py4>, %<py5>,  %<pxd>);
+  GY_88_Outputs_wrapper( %<py0>, %<py1>, %<py2>, %<py3>, %<py4>, %<py5>,  %<pxd>, %<pp1>, %<param_width1>);
 
   %%
 %endfunction
@@ -98,9 +107,16 @@
   %assign py5 = LibBlockOutputSignalAddr(5, "", "", 0)
   %assign pxd = LibBlockDWorkAddr(DSTATE, "", "", 0)
   
-  
+   
+  %assign nelements1 = LibBlockParameterSize(P1)
+  %assign param_width1 = nelements1[0] * nelements1[1]  
+  %if (param_width1) > 1  
+   %assign pp1 = LibBlockMatrixParameterBaseAddr(P1)
+  %else  
+   %assign pp1 = LibBlockParameterAddr(P1, "", "", 0)
+  %endif
  
-  GY_88_Update_wrapper( %<py0>, %<py1>, %<py2>, %<py3>, %<py4>, %<py5>, %<pxd>);
+  GY_88_Update_wrapper( %<py0>, %<py1>, %<py2>, %<py3>, %<py4>, %<py5>, %<pxd>, %<pp1>, %<param_width1>);
   
 
   %%

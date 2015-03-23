@@ -25,7 +25,7 @@
   *  -------------------------------------------------------------------------
   * | See matlabroot/simulink/src/sfuntmpl_doc.c for a more detailed template |
   *  ------------------------------------------------------------------------- 
-* Created: Fri Mar 20 16:38:43 2015
+* Created: Mon Mar 23 07:45:44 2015
 */
 #define S_FUNCTION_LEVEL 2
 #define S_FUNCTION_NAME GY_88
@@ -131,9 +131,13 @@
 #define OUT_5_BIAS            0
 #define OUT_5_SLOPE           0.125
 
-#define NPARAMS              0
+#define NPARAMS              1
+/* Parameter  1 */
+#define PARAMETER_0_NAME      S_T
+#define PARAMETER_0_DTYPE     real_T
+#define PARAMETER_0_COMPLEX   COMPLEX_NO
 
-#define SAMPLE_TIME_0        0.01
+#define SAMPLE_TIME_0        S_T
 #define NUM_DISC_STATES      1
 #define DISC_STATES_IC       [0]
 #define NUM_CONT_STATES      0
@@ -150,6 +154,10 @@
 /* %%%-SFUNWIZ_defines_Changes_END --- EDIT HERE TO _BEGIN */
 /*<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<*/
 #include "simstruc.h"
+#define PARAM_DEF0(S) ssGetSFcnParam(S, 0)
+
+#define IS_PARAM_DOUBLE(pVal) (mxIsNumeric(pVal) && !mxIsLogical(pVal) &&\
+!mxIsEmpty(pVal) && !mxIsSparse(pVal) && !mxIsComplex(pVal) && mxIsDouble(pVal))
 
 extern void GY_88_Outputs_wrapper(real_T *temperature,
 			real_T *pressure,
@@ -157,18 +165,62 @@ extern void GY_88_Outputs_wrapper(real_T *temperature,
 			real_T *magnitude,
 			real_T *acceleration,
 			real_T *angular_velocity,
-			const real_T *xD);
+			const real_T *xD,
+			const real_T  *S_T, const int_T  p_width0);
 extern void GY_88_Update_wrapper(const real_T *temperature,
 			const real_T *pressure,
 			const real_T *altitude,
 			const real_T *magnitude,
 			const real_T *acceleration,
 			const real_T *angular_velocity,
-			real_T *xD);
+			real_T *xD,
+			const real_T  *S_T,  const int_T  p_width0);
 
 /*====================*
  * S-function methods *
  *====================*/
+#define MDL_CHECK_PARAMETERS
+ #if defined(MDL_CHECK_PARAMETERS) && defined(MATLAB_MEX_FILE)
+   /* Function: mdlCheckParameters =============================================
+     * Abstract:
+     *    Validate our parameters to verify they are okay.
+     */
+    static void mdlCheckParameters(SimStruct *S)
+    {
+     int paramIndex  = 0;
+     bool validParam = false;
+     /* All parameters must match the S-function Builder Dialog */
+     
+
+	 {
+	  const mxArray *pVal0 = ssGetSFcnParam(S,0);
+	  if (!mxIsDouble(pVal0)) {
+	    ssSetErrorStatus(S,"Sample time parameter S_T must be of type double");
+	    return; 
+	  }
+	 }
+
+	 {
+	  const mxArray *pVal0 = ssGetSFcnParam(S,0);
+	  if (!IS_PARAM_DOUBLE(pVal0)) {
+	    validParam = true;
+	    paramIndex = 0;
+	    goto EXIT_POINT;
+	  }
+	 }
+      
+     EXIT_POINT:
+      if (validParam) {
+          char parameterErrorMsg[1024];
+          sprintf(parameterErrorMsg, "The data type and or complexity of parameter  %d does not match the "
+                  "information specified in the S-function Builder dialog. "
+                  "For non-double parameters you will need to cast them using int8, int16, "
+                  "int32, uint8, uint16, uint32 or boolean.", paramIndex + 1);
+	  ssSetErrorStatus(S,parameterErrorMsg);
+      }
+	return;
+    }
+ #endif /* MDL_CHECK_PARAMETERS */
 /* Function: mdlInitializeSizes ===============================================
  * Abstract:
  *   Setup sizes of the various vectors.
@@ -177,10 +229,17 @@ static void mdlInitializeSizes(SimStruct *S)
 {
 
     DECL_AND_INIT_DIMSINFO(outputDimsInfo);
-    ssSetNumSFcnParams(S, NPARAMS);
-     if (ssGetNumSFcnParams(S) != ssGetSFcnParamsCount(S)) {
-	 return; /* Parameter mismatch will be reported by Simulink */
-     }
+    ssSetNumSFcnParams(S, NPARAMS);  /* Number of expected parameters */
+      #if defined(MATLAB_MEX_FILE)
+	if (ssGetNumSFcnParams(S) == ssGetSFcnParamsCount(S)) {
+	  mdlCheckParameters(S);
+	  if (ssGetErrorStatus(S) != NULL) {
+	    return;
+	  }
+	 } else {
+	   return; /* Parameter mismatch will be reported by Simulink */
+	 }
+      #endif
 
     ssSetNumContStates(S, NUM_CONT_STATES);
     ssSetNumDiscStates(S, NUM_DISC_STATES);
@@ -234,7 +293,7 @@ static void mdlInitializeSizes(SimStruct *S)
  */
 static void mdlInitializeSampleTimes(SimStruct *S)
 {
-    ssSetSampleTime(S, 0, SAMPLE_TIME_0);
+    ssSetSampleTime(S, 0, *mxGetPr(ssGetSFcnParam(S, 0)));
     ssSetOffsetTime(S, 0, 0.0);
 }
 #define MDL_INITIALIZE_CONDITIONS
@@ -261,6 +320,18 @@ static void mdlSetDefaultPortDataTypes(SimStruct *S)
 {
    ssSetOutputPortDataType(S, 0, SS_DOUBLE);
 }
+
+#define MDL_SET_WORK_WIDTHS
+#if defined(MDL_SET_WORK_WIDTHS) && defined(MATLAB_MEX_FILE)
+
+static void mdlSetWorkWidths(SimStruct *S)
+{
+
+     const char_T *rtParamNames[] = {"P1"};
+     ssRegAllTunableParamsAsRunTimeParams(S, rtParamNames);
+}
+
+#endif
 /* Function: mdlOutputs =======================================================
  *
 */
@@ -273,9 +344,11 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     real_T        *acceleration  = (real_T *)ssGetOutputPortRealSignal(S,4);
     real_T        *angular_velocity  = (real_T *)ssGetOutputPortRealSignal(S,5);
     const real_T   *xD = ssGetDiscStates(S);
+    const int_T   p_width0  = mxGetNumberOfElements(PARAM_DEF0(S));
+    const real_T  *S_T  = (const real_T *)mxGetData(PARAM_DEF0(S));
 
 
-    GY_88_Outputs_wrapper(temperature, pressure, altitude, magnitude, acceleration, angular_velocity, xD);
+    GY_88_Outputs_wrapper(temperature, pressure, altitude, magnitude, acceleration, angular_velocity, xD, S_T, p_width0);
 
 
 }
@@ -296,8 +369,10 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     real_T        *magnitude  = (real_T *)ssGetOutputPortRealSignal(S,3);
     real_T        *acceleration  = (real_T *)ssGetOutputPortRealSignal(S,4);
     real_T        *angular_velocity  = (real_T *)ssGetOutputPortRealSignal(S,5);
+    const int_T   p_width0  = mxGetNumberOfElements(PARAM_DEF0(S));
+    const real_T  *S_T  = (const real_T *)mxGetData(PARAM_DEF0(S));
 
-    GY_88_Update_wrapper(temperature, pressure, altitude, magnitude, acceleration, angular_velocity,  xD);
+    GY_88_Update_wrapper(temperature, pressure, altitude, magnitude, acceleration, angular_velocity,  xD, S_T, p_width0);
 }
 
 

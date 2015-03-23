@@ -21,8 +21,6 @@
 #include <Wire.cpp>
 #include <twi.h>
 #include <twi.c>
-#include <SoftwareSerial.h>
-#include <SoftwareSerial.cpp>
 #include <BMP085.h>
 #include <BMP085.cpp>
 #include <HMC5883L.h>
@@ -56,7 +54,8 @@ extern "C" void GY_88_Outputs_wrapper(real_T *temperature,
 			real_T *magnitude,
 			real_T *acceleration,
 			real_T *angular_velocity,
-			const real_T *xD)
+			const real_T *xD,
+			const real_T  *S_T, const int_T  p_width0)
 {
 /* %%%-SFUNWIZ_wrapper_Outputs_Changes_BEGIN --- EDIT HERE TO _END */
 if (xD[0]==1) {    
@@ -100,7 +99,8 @@ extern "C" void GY_88_Update_wrapper(const real_T *temperature,
 			const real_T *magnitude,
 			const real_T *acceleration,
 			const real_T *angular_velocity,
-			real_T *xD)
+			real_T *xD,
+			const real_T  *S_T,  const int_T  p_width0)
 {
   /* %%%-SFUNWIZ_wrapper_Update_Changes_BEGIN --- EDIT HERE TO _END */
 if (xD[0]!=1) {    
