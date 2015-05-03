@@ -1,8 +1,8 @@
 # skyward-simulink-blockset
 
-This repository contains the Simulink blockset for Sensors used on the calibration platform
+This repository contains the Simulink blockset for the GY-88 IMU
 
-# 
+
 # INSTALLATION ISTRUCTION
 # 
 
