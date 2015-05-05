@@ -3,7 +3,7 @@
 This repository contains the Simulink blockset for the GY-88 IMU
 
 
-# INSTALLATION INSTRUCTION
+# INSTALLATION INSTRUCTIONS
 # 
 
 # Linux 
