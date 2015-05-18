@@ -25,10 +25,6 @@ This repository contains the Simulink blockset for the GY-88 IMU
 
 * Currently not tested
 
-# TODO
-
-* Script for automatizing the installation procedures
-
 # NOTES  
 
 * You MUST have MATLAB R2015a with Arduino support package installed !
