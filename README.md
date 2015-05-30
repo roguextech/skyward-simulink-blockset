@@ -10,17 +10,17 @@ This repository contains the Simulink blockset for the GY-88 IMU
 
 * Make sure to have GCC installed (sudo apt-get install gcc g++)
 * From MATLAB command window run mex -setup (this will configure the mex compiler)
-* Open the IMU.slx S-Function
-* Double click on the block, select the desired valuse for S_T (sample time) and build the S-Function (in order to generate tlc and wrapper files)
+* Run skywardconfigurescript.m
+* Refresh Simulink library browser
 
 # Windows
 
 * From Add/Remove programs uninstall "Microsoft Visual C++ 2010 Redistributable" both x86 and x64 version
 * Download and install the Windows 7 SDK, make sure to select "Microsoft Visual C++ Compiler" during the setup process
 * From MATLAB command line run mex -setup, you should see "MATLAB configured to use Microsoft Visual C++ Compiler"
-* Open the IMU.slx S-function
-* Double click on the block, select the desired valuse for S_T (sample time) and build the S-Function (in order to generate tlc and wrapper files)
-
+* Run skywardconfigurescript.m
+* Refresh Simulink library browser
+* 
 # OS X
 
 * Currently not tested
